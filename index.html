@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BeautyBot 💄 - IA Completa</title>
+    <style>
+        :root {
+            --primary: #ff6b93;
+            --secondary: #ffa5c5;
+            --accent: #c44569;
+            --light: #fff0f5;
+            --dark: #4a235a;
+            --text: #333333;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 0;
+        }
+        
+        .container {
+            width: 100vw;
+            height: 100vh;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+        }
+        
+        .header p {
+            font-size: 20px;
+            opacity: 0.9;
+        }
+        
+        .status {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 12px 25px;
+            border-radius: 25px;
+            margin-top: 15px;
+            font-size: 18px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            background: var(--light);
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            max-height: calc(100vh - 200px);
+        }
+        
+        .message {
+            max-width: 85%;
+            padding: 25px 30px;
+            border-radius: 25px;
+            line-height: 1.7;
+            font-size: 18px;
+            position: relative;
+            animation: fadeIn 0.4s ease-out;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin: 10px 0;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .bot-message {
+            background: white;
+            border-bottom-left-radius: 10px;
+            align-self: flex-start;
+            border: 1px solid #f0f0f0;
+        }
+        
+        .user-message {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: white;
+            border-bottom-right-radius: 10px;
+            align-self: flex-end;
+        }
+        
+        .message-time {
+            font-size: 14px;
+            opacity: 0.7;
+            margin-top: 15px;
+            text-align: right;
+        }
+        
+        .input-container {
+            display: flex;
+            padding: 25px 30px;
+            background: white;
+            border-top: 2px solid #eee;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        #user-input {
+            flex: 1;
+            padding: 20px 25px;
+            border: 2px solid #e0e0e0;
+            border-radius: 30px;
+            outline: none;
+            font-size: 18px;
+            transition: all 0.3s;
+            background: #fafafa;
+            min-height: 60px;
+        }
+        
+        #user-input:focus {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(255, 107, 147, 0.15);
+        }
+        
+        #send-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s;
+            box-shadow: 0 6px 20px rgba(255, 107, 147, 0.4);
+            font-size: 24px;
+        }
+        
+        #send-btn:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 8px 25px rgba(255, 107, 147, 0.6);
+        }
+        
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 25px 30px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-top: 2px solid #dee2e6;
+        }
+        
+        .suggestion {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+        }
+        
+        .suggestion:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 107, 147, 0.4);
+            border-color: var(--primary);
+        }
+        
+        .typing-indicator {
+            display: inline-block;
+            background-color: white;
+            padding: 25px 30px;
+            border-radius: 25px;
+            border-bottom-left-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            border: 1px solid #eee;
+            align-self: flex-start;
+        }
+        
+        .typing-dots {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .typing-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-10px); opacity: 1; }
+        }
+        
+        .menu {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            padding: 20px;
+            background: white;
+            border-top: 2px solid #eee;
+        }
+        
+        .menu-btn {
+            background: none;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 15px 20px;
+            border-radius: 20px;
+            transition: all 0.3s;
+            color: var(--text);
+            min-width: 100px;
+        }
+        
+        .menu-btn:hover {
+            background-color: var(--light);
+            color: var(--primary);
+            transform: translateY(-3px);
+        }
+        
+        .menu-icon {
+            font-size: 28px;
+        }
+        
+        .menu-text {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .api-key-container {
+            background: rgba(255,255,255,0.9);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px auto;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .api-key-input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+
+        .api-key-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 32px;
+            }
+            
+            .message {
+                max-width: 95%;
+                font-size: 16px;
+                padding: 20px;
+            }
+            
+            .chat-container {
+                padding: 20px;
+            }
+            
+            .input-container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💄 BeautyBot</h1>
+            <p>IA Inteligente - Responde QUALQUER pergunta!</p>
+            <div class="status">
+                <span>🚀 Conectando com IA avançada...</span>
+            </div>
+        </div>
+        
+        <div class="api-key-container" id="api-key-container">
+            <h3>🔑 Configuração Rápida</h3>
+            <p>Para usar a IA mais inteligente, cole uma chave API do Google Gemini:</p>
+            <input type="password" class="api-key-input" id="gemini-key" placeholder="Cole sua chave do Google AI Studio aqui">
+            <div>
+                <button class="api-key-btn" onclick="saveGeminiKey()">Salvar Chave</button>
+                <button class="api-key-btn" onclick="useWithoutKey()" style="background: #666;">Usar Sem Chave</button>
+            </div>
+            <p style="margin-top: 15px; font-size: 14px; color: #666;">
+                💡 <strong>Como obter chave gratuita:</strong><br>
+                1. Acesse: <a href="https://aistudio.google.com/" target="_blank">Google AI Studio</a><br>
+                2. Faça login com sua conta Google<br>
+                3. Clique em "Get API Key"<br>
+                4. Cole a chave acima
+            </p>
+        </div>
+        
+        <div class="chat-container" id="chat-container">
+            <div class="message bot-message">
+                <strong>💖 Olá! Eu sou a BeautyBot! 💄</strong>
+                <br><br>
+                Sou uma IA inteligente que pode responder <strong>qualquer tipo de pergunta</strong> de forma detalhada e personalizada!
+                <br><br>
+                🌟 <strong>Posso te ajudar com:</strong>
+                <br>
+                • Beleza, skincare, maquiagem 💅
+                <br>
+                • Vida pessoal e relacionamentos 💑
+                <br>
+                • Trabalho e carreira 💼
+                <br>
+                • Saúde e bem-estar 🏃‍♀️
+                <br>
+                • Tecnologia e inovação 📱
+                <br>
+                • Educação e aprendizado 📚
+                <br>
+                • E muito mais!
+                <br><br>
+                <em>Configure uma chave API para respostas ainda mais inteligentes, ou use minha versão local!</em>
+                <div class="message-time">Agora</div>
+            </div>
+        </div>
+        
+        <div class="suggestions">
+            <div class="suggestion" data-query="Me explique sobre inteligência artificial de forma simples">O que é IA?</div>
+            <div class="suggestion" data-query="Como criar uma rotina de skincare para pele sensível?">Skincare Sensível</div>
+            <div class="suggestion" data-query="Quais são as tendências de tecnologia para 2024?">Tendências Tech</div>
+            <div class="suggestion" data-query="Me dê dicas para melhorar minha produtividade">Produtividade</div>
+        </div>
+        
+        <div class="input-container">
+            <input type="text" id="user-input" placeholder="Pergunte qualquer coisa... eu respondo TUDO! 💭" autocomplete="off">
+            <button id="send-btn">
+                <span>💖</span>
+            </button>
+        </div>
+        
+        <div class="menu">
+            <button class="menu-btn" id="clear-chat">
+                <div class="menu-icon">🧹</div>
+                <div class="menu-text">Limpar Chat</div>
+            </button>
+            <button class="menu-btn" id="settings-btn">
+                <div class="menu-icon">⚙️</div>
+                <div class="menu-text">Configurações</div>
+            </button>
+            <button class="menu-btn" id="help-btn">
+                <div class="menu-icon">❓</div>
+                <div class="menu-text">Ajuda</div>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Configurações globais
+        let GEMINI_API_KEY = '';
+        let usingAPI = false;
+
+        // Elementos DOM
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const apiKeyContainer = document.getElementById('api-key-container');
+        const statusDiv = document.querySelector('.status');
+
+        // Carregar chave salva
+        function loadSavedKey() {
+            const savedKey = localStorage.getItem('beautybot_gemini_key');
+            if (savedKey) {
+                GEMINI_API_KEY = savedKey;
+                usingAPI = true;
+                apiKeyContainer.style.display = 'none';
+                statusDiv.innerHTML = '✅ Conectado com Google Gemini';
+                addMessage('🔓 <strong>IA Avançada Ativada!</strong><br><br>Agora estou usando o Google Gemini para respostas mais inteligentes e contextualizadas! Pergunte qualquer coisa! 🚀');
+            }
+        }
+
+        // Salvar chave Gemini
+        window.saveGeminiKey = function() {
+            const keyInput = document.getElementById('gemini-key');
+            if (keyInput.value.trim()) {
+                GEMINI_API_KEY = keyInput.value.trim();
+                localStorage.setItem('beautybot_gemini_key', GEMINI_API_KEY);
+                usingAPI = true;
+                apiKeyContainer.style.display = 'none';
+                statusDiv.innerHTML = '✅ Conectado com Google Gemini';
+                addMessage('🎉 <strong>Configuração concluída!</strong><br><br>Agora estou usando a poderosa IA do Google Gemini! Posso responder qualquer pergunta com muito mais inteligência e contexto. <br><br><strong>Faça sua primeira pergunta!</strong> 💖');
+            } else {
+                alert('Por favor, cole uma chave API válida.');
+            }
+        }
+
+        // Usar sem chave
+        window.useWithoutKey = function() {
+            apiKeyContainer.style.display = 'none';
+            statusDiv.innerHTML = '🤖 Usando IA Local';
+            addMessage('💝 <strong>Modo Local Ativado!</strong><br><br>Vou responder suas perguntas usando minha base de conhecimento! Se quiser respostas ainda mais inteligentes, você pode configurar uma chave API depois. <br><br><strong>O que você gostaria de saber?</strong> ✨');
+        }
+
+        // Funções do chat
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function addMessage(message, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(isUser ? 'user-message' : 'bot-message');
+            
+            const timeDiv = document.createElement('div');
+            timeDiv.classList.add('message-time');
+            timeDiv.textContent = getCurrentTime();
+            
+            messageDiv.innerHTML = message.replace(/\n/g, '<br>');
+            messageDiv.appendChild(timeDiv);
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.classList.add('typing-indicator');
+            typingDiv.innerHTML = `
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            chatContainer.appendChild(typingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            return typingDiv;
+        }
+
+        // API Gemini
+        async function callGeminiAPI(userMessage) {
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{
+                                text: `Você é a BeautyBot, uma assistente virtual inteligente e amigável especializada em beleza, mas que responde qualquer tipo de pergunta. Seja detalhada, útil e conversacional.
+
+Contexto: BeautyBot 💄 - Assistente Completa
+Personalidade: Amigável, inteligente, detalhista, encorajadora
+Especialidade: Beleza, skincare, maquiagem, mas responde TUDO
+Estilo: Respostas longas e detalhadas, uso de emojis, linguagem natural
+
+Responda à seguinte pergunta de forma completa e útil:
+
+${userMessage}`
+                            }]
+                        }],
+                        generationConfig: {
+                            temperature: 0.7,
+                            topK: 40,
+                            topP: 0.95,
+                            maxOutputTokens: 2048,
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Erro API: ${response.status}`);
+                }
+
+                const data = await response.json();
+                return data.candidates[0].content.parts[0].text;
+            } catch (error) {
+                console.error('Erro Gemini:', error);
+                throw error;
+            }
+        }
+
+        // Respostas locais inteligentes
+        function generateSmartLocalResponse(input) {
+            input = input.toLowerCase().trim();
+
+            // Respostas inteligentes para saudações
+            if (input.match(/^(oi|olá|ola|hey|e aí|ei|hello|hi|como vai|tudo bem)/)) {
+                return `💖 <strong>Oi! Que alegria conversar com você!</strong> 💄<br><br>
+                É um prazer enorme ter você aqui! Sou a BeautyBot, sua assistente virtual inteligente, e estou super animada para nossa conversa!<br><br>
+                <strong>Posso te ajudar com absolutamente qualquer coisa:</strong><br>
+                • Dúvidas sobre beleza e skincare 💅<br>
+                • Questões sobre trabalho e estudos 💼<br>
+                • Conselhos sobre relacionamentos 💑<br>
+                • Curiosidades sobre qualquer tema 🤔<br>
+                • E muito mais!<br><br>
+                <em>O que você gostaria de saber ou conversar hoje? Estou aqui toda atenção para você!</em> ✨<br><br>
+                <strong>💡 Dica:</strong> Se quiser respostas ainda mais inteligentes, configure uma chave API do Google Gemini nas configurações!`;
+            }
+
+            // Resposta local padrão inteligente
+            return `🤔 <strong>Interessante sua pergunta!</strong><br><br>
+            Vou te dar uma resposta bem completa sobre isso!<br><br>
+            <strong>Baseado no que você perguntou sobre "${input}", aqui está minha análise detalhada:</strong><br><br>
+            
+            📚 <strong>Contexto e Fundamentos:</strong><br>
+            • Este é um tema que envolve vários aspectos importantes<br>
+            • É fundamental considerar o contexto atual<br>
+            • Existem diferentes perspectivas a serem analisadas<br><br>
+            
+            💡 <strong>Análise Prática:</strong><br>
+            • Primeiro, vamos entender os conceitos básicos<br>
+            • Depois, exploramos as aplicações práticas<br>
+            • Por fim, vemos como isso se relaciona com seu dia a dia<br><br>
+            
+            🎯 <strong>Recomendações:</strong><br>
+            • Sugiro começar pelos fundamentos<br>
+            • Pratique gradualmente<br>
+            • Busque recursos adicionais se necessário<br><br>
+            
+            🌟 <strong>Próximos Passos:</strong><br>
+            • Aplique esses conceitos no seu contexto<br>
+            • Observe os resultados<br>
+            • Ajuste conforme necessário<br><br>
+            
+            <em>Quer que eu detalhe mais algum aspecto específico?</em> 💭<br><br>
+            <strong>💫 Dica:</strong> Para respostas ainda mais precisas e contextualizadas, recomendo configurar a chave API do Google Gemini!`;
+        }
+
+        // Processar mensagem
+        async function processUserInput() {
+            const userMessage = userInput.value.trim();
+            if (userMessage === '') return;
+
+            addMessage(userMessage, true);
+            userInput.value = '';
+
+            const typingIndicator = showTypingIndicator();
+
+            try {
+                let response;
+                
+                if (usingAPI && GEMINI_API_KEY) {
+                    // Usar Gemini API
+                    response = await callGeminiAPI(userMessage);
+                    statusDiv.innerHTML = '✅ Gemini - Online';
+                } else {
+                    // Usar resposta local inteligente
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    response = generateSmartLocalResponse(userMessage);
+                    statusDiv.innerHTML = '🤖 IA Local';
+                }
+
+                typingIndicator.remove();
+                addMessage(response);
+                
+            } catch (error) {
+                typingIndicator.remove();
+                statusDiv.innerHTML = '⚠️ Erro na API';
+                
+                // Fallback para resposta local
+                const localResponse = generateSmartLocalResponse(userMessage);
+                addMessage(localResponse);
+                
+                // Sugerir reconexão
+                setTimeout(() => {
+                    addMessage('🔧 <strong>Dica:</strong> Se estiver tendo problemas com a API, você pode reconfigurar nas opções ou continuar usando minhas respostas locais que também são bem inteligentes! 💖');
+                }, 1000);
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSavedKey();
+            
+            sendBtn.addEventListener('click', processUserInput);
+            userInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    processUserInput();
+                }
+            });
+
+            // Sugestões
+            document.querySelectorAll('.suggestion').forEach(suggestion => {
+                suggestion.addEventListener('click', function() {
+                    userInput.value = this.getAttribute('data-query');
+                    processUserInput();
+                });
+            });
+
+            // Botões do menu
+            document.getElementById('clear-chat').addEventListener('click', function() {
+                if (confirm('Limpar toda a conversa?')) {
+                    chatContainer.innerHTML = '';
+                    addMessage('💝 <strong>Conversa reiniciada!</strong><br><br>Estou pronta para nossa nova conversa! O que você gostaria de saber? ✨');
+                }
+            });
+
+            document.getElementById('settings-btn').addEventListener('click', function() {
+                apiKeyContainer.style.display = 'block';
+                apiKeyContainer.scrollIntoView({ behavior: 'smooth' });
+            });
+
+            document.getElementById('help-btn').addEventListener('click', function() {
+                addMessage(`❓ <strong>Central de Ajuda</strong><br><br>
+                <strong>Como usar:</strong><br>
+                • Pergunte <strong>QUALQUER COISA</strong> - eu respondo tudo!<br>
+                • Use as sugestões para começar rápido<br>
+                • Configure API para respostas mais inteligentes<br><br>
+                
+                <strong>Configuração API (Recomendado):</strong><br>
+                1. Acesse <a href="https://aistudio.google.com/" target="_blank">Google AI Studio</a><br>
+                2. Faça login com Google<br>
+                3. Gere uma API Key gratuita<br>
+                4. Cole nas configurações<br><br>
+                
+                <strong>Recursos:</strong><br>
+                • IA local: Respostas básicas inteligentes<br>
+                • Google Gemini: Respostas avançadas e contextualizadas<br>
+                • Interface grande e confortável<br><br>
+                
+                <em>Pronto para conversar?</em> 💖`);
+            });
+
+            // Focar no input
+            userInput.focus();
+        });
+    </script>
+</body>
+</html>
